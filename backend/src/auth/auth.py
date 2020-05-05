@@ -136,7 +136,10 @@ def requires_auth(permission=''):
             try:
                 payload = verify_decode_jwt(token)
             except:
-                abort(401)
+                raise AuthError({
+                    'code': 'invalid_token',
+                    'description': 'Access denied due to invalid token'
+                }, 401)
 
             check_permissions(permission, payload)
             return f(payload, *args, **kwargs)

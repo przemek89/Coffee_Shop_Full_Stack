@@ -27,24 +27,26 @@ def get_drinks():
         return jsonify({
             'sucess': True,
             'drinks': [drink.short() for drink in drinks]
-        }, 200)
+        })
     except:
         abort(404)
 
 @app.route('/drinks-detail')
-def get_drink_detail():
+@requires_auth('get:drinks-detail')
+def get_drink_detail(jwt):
     try:
         drinks = Drink.query.all()
         return jsonify({
             'success': True,
             'drinks': [drink.long() for drink in drinks]
-        }, 200)
+        })
     except:
         abort(404)
 
 
 @app.route('/drinks', methods = ['POST'])
-def add_new_drink():
+@requires_auth('post:drinks')
+def add_new_drink(jwt):
     title = request.form.get('title')
     recipe = request.form.get('recipe')
     try:
@@ -53,13 +55,14 @@ def add_new_drink():
         return jsonify({
             'success': True,
             'drinks': [drink.long()]
-        }, 200)
+        })
     except:
         abort(422)
 
 
 @app.route('/drinks/<id>', methods = ['PATCH'])
-def update_drink(id):
+@requires_auth('patch:drinks')
+def update_drink(jwt, id):
     drink = Drink.query.get(id)
     if drink:
         try:
@@ -77,7 +80,8 @@ def update_drink(id):
 
 
 @app.route('/drinks/<id>', methods = ['DELETE'])
-def delete_drink(id):
+@requires_auth('delete:drinks')
+def delete_drink(jwt, id):
     drink = Drink.query.get(id)
     if drink:
         try:
@@ -109,10 +113,10 @@ def not_found(error):
         "message": "resource not found"
         }), 404
 
-@app.errorhandler(401)
-def unauthorized(error):
+@app.errorhandler(AuthError)
+def unauthorized(ex):
     return jsonify({
         "success": False,
-        "error": 401,
-        "message": "access forbidden"
+        "error": ex.status_code,
+        "message": ex.error
         }), 401
