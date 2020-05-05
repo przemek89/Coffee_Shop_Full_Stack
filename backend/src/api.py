@@ -55,20 +55,25 @@ def add_new_drink():
             'drinks': [drink.long()]
         }, 200)
     except:
+        abort(422)
+
+
+@app.route('/drinks/<id>', methods = ['PATCH'])
+def update_drink(id):
+    drink = Drink.query.get(id)
+    if drink:
+        try:
+            drink.title = request.form.get('title')
+            drink.recipe = request.form.get('recipe')
+            drink.update()
+            return jsonify({
+                'success': True,
+                'drinks':[drink.long()]
+            })
+        except:
+            abort(422)
+    else:
         abort(404)
-
-'''
-@TODO implement endpoint
-    PATCH /drinks/<id>
-        where <id> is the existing model id
-        it should respond with a 404 error if <id> is not found
-        it should update the corresponding row for <id>
-        it should require the 'patch:drinks' permission
-        it should contain the drink.long() data representation
-    returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
-        or appropriate status code indicating reason for failure
-'''
-
 
 '''
 @TODO implement endpoint
