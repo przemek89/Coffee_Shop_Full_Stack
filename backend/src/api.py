@@ -47,10 +47,12 @@ def get_drink_detail(jwt):
 @app.route('/drinks', methods = ['POST'])
 @requires_auth('post:drinks')
 def add_new_drink(jwt):
-    title = request.form.get('title')
-    recipe = request.form.get('recipe')
+    body = request.get_json()
+    title = body.get('title')
+    recipe = body.get('recipe')
+
     try:
-        drink = Drink(title=title, recipe=recipe)
+        drink = Drink(title=title, recipe=json.dumps(recipe))
         drink.insert()
         return jsonify({
             'success': True,
@@ -66,8 +68,14 @@ def update_drink(jwt, id):
     drink = Drink.query.get(id)
     if drink:
         try:
-            drink.title = request.form.get('title')
-            drink.recipe = request.form.get('recipe')
+            body = request.get_json()
+
+            title = body.get('title')
+            recipe = body.get('recipe')
+
+            drink.title = title
+            drink.recipe = recipe
+
             drink.update()
             return jsonify({
                 'success': True,
